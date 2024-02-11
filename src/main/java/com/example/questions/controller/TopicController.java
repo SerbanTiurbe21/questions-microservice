@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/topics")
+@RequestMapping("/api/v1/topics")
 public class TopicController {
 
     private final TopicServiceImpl topicServiceImpl;
