@@ -13,21 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @Document(collection = "questions")
 public class Question {
-
     @Id
     private String id;
-
     @Field(name = "question")
     private String question;
-
     @Field(name = "answer")
     private String answer;
-
     @DBRef
     private List<Topic> topics;
-
     private byte[] image;
-
     public Question(String question, String answer, List<Topic> topics, byte[] image) {
         this.question = question;
         this.answer = answer;

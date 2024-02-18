@@ -15,10 +15,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Topic {
     @Id
     private String id;
-
     @Indexed(unique = true)
     private String name;
-
     @Transient
     private Integer nrOfQuestions;
 }

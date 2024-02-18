@@ -11,17 +11,16 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @Component
-public class ValidationServiceImpl implements ValidationService{
+public class ValidationServiceImpl implements ValidationService {
     @Override
     public byte[] isValidFile(MultipartFile file) throws ImageTypeException, IOException {
-
-        if(file == null) {
+        if (file == null) {
             return null;
         } else {
             String imageType = file.getContentType();
             if (imageType == null) throw new ImageTypeException("Image file is empty");
-            if(!isSupportedContentType(imageType))  throw new ImageTypeException("Invalid file type");
-            if(!isNotCorruptContent(file))  throw new ImageTypeException("Image file is corrupted");
+            if (!isSupportedContentType(imageType)) throw new ImageTypeException("Invalid file type");
+            if (!isNotCorruptContent(file)) throw new ImageTypeException("Image file is corrupted");
             if (isNotCorruptContent(file)) isSupportedContentType(imageType);
 
             return file.getBytes();
@@ -30,26 +29,26 @@ public class ValidationServiceImpl implements ValidationService{
 
     @Override
     public void isValidText(String text) throws BlankTextException {
-        if(!isNotEmptyText(text)) throw  new BlankTextException("Complete required fields");
+        if (!isNotEmptyText(text)) throw new BlankTextException("Complete required fields");
     }
 
     private boolean isSupportedContentType(String contentType) {
-        return contentType.equalsIgnoreCase( MediaType.IMAGE_PNG.toString())
+        return contentType.equalsIgnoreCase(MediaType.IMAGE_PNG.toString())
                 || contentType.equalsIgnoreCase(MediaType.IMAGE_JPEG.toString())
                 || contentType.equalsIgnoreCase(MediaType.IMAGE_GIF.toString());
     }
 
-    private boolean isNotCorruptContent(MultipartFile file){
-        try{
+    private boolean isNotCorruptContent(MultipartFile file) {
+        try {
             BufferedImage image = ImageIO.read(file.getInputStream());
             return image != null && image.getWidth() > 0 && image.getHeight() > 0;
-        }catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
     private boolean isNotEmptyText(String text) {
-        if(text == null || text.trim().equalsIgnoreCase("null")) return false;
+        if (text == null || text.trim().equalsIgnoreCase("null")) return false;
         return !text.isBlank();
     }
 }

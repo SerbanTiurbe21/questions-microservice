@@ -1,31 +1,26 @@
 package com.example.questions.controller;
 
 import com.example.questions.model.Topic;
-import com.example.questions.service.TopicServiceImpl;
+import com.example.questions.service.TopicService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/topics")
 public class TopicController {
-
-    private final TopicServiceImpl topicServiceImpl;
-
-    TopicController(TopicServiceImpl topicServiceImpl) {
-        this.topicServiceImpl = topicServiceImpl;
-    }
-
+    private final TopicService topicService;
     @PostMapping()
-    @ResponseStatus(value = HttpStatus.CREATED)
-    public Topic addTopic(@RequestBody Topic topic) throws Exception {
-        return topicServiceImpl.addTopic(topic);
+    public ResponseEntity<Topic> addTopic(@RequestBody Topic topic) throws Exception {
+        Topic createdTopic = topicService.addTopic(topic);
+        return new ResponseEntity<>(createdTopic, HttpStatus.CREATED);
     }
-
     @GetMapping()
-    public List<Topic> displayTopics() {
-        return topicServiceImpl.findAll();
+    public ResponseEntity<List<Topic>> displayTopics() {
+        return new ResponseEntity<>(topicService.findAll(), HttpStatus.OK);
     }
-
 }
