@@ -2,6 +2,13 @@ package com.example.questions.controller;
 
 import com.example.questions.model.Topic;
 import com.example.questions.service.TopicService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Topics", description = "Operations related to topics")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/topics")
@@ -16,14 +24,25 @@ import java.util.List;
 public class TopicController {
     private final TopicService topicService;
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Topic added successfully", content = @Content(schema = @Schema(implementation = Topic.class))),
+            @ApiResponse(responseCode = "400", description = "Failed to add topic")
+    })
+    @Operation(summary = "Add a topic", description = "Return a topic object with status 201 if successful, or 400 if failed")
     @PostMapping()
-    public ResponseEntity<Topic> addTopic(@RequestBody Topic topic) throws Exception {
+    public ResponseEntity<Topic> addTopic(@Parameter(description = "Topic object to be added to the database") @RequestBody Topic topic) throws Exception {
         Topic createdTopic = topicService.addTopic(topic);
         return new ResponseEntity<>(createdTopic, HttpStatus.CREATED);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Topic retrieved successfully", content = @Content(schema = @Schema(implementation = Topic.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @Operation(summary = "Get all topics", description = "Return a list of topic objects")
     @GetMapping()
     public ResponseEntity<List<Topic>> displayTopics() {
-        return new ResponseEntity<>(topicService.findAll(), HttpStatus.OK);
+        List<Topic> topics = topicService.findAll();
+        return new ResponseEntity<>(topics, HttpStatus.OK);
     }
 }
