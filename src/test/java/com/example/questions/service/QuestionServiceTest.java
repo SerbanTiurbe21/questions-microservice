@@ -8,6 +8,7 @@ import com.example.questions.model.Topic;
 import com.example.questions.repository.QuestionRepository;
 import com.example.questions.repository.TopicRepository;
 import com.example.questions.validator.ValidationService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,13 @@ public class QuestionServiceTest {
         imageFile = new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
     }
 
+    @AfterEach
+    public void tearDown() {
+        question = null;
+        topic = null;
+        imageFile = null;
+    }
+
     @Test
     public void shouldCreateQuestion() throws Exception {
         when(validationService.isValidFile(imageFile)).thenReturn(new byte[0]);
@@ -56,6 +64,7 @@ public class QuestionServiceTest {
         Question result = questionService.createQuestion(imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
 
         assertEquals(question, result);
+        verify(questionRepository, times(1)).getNrOfQuestionsByTopicId(anyString());
         verify(validationService, times(1)).isValidFile(imageFile);
         verify(questionRepository, times(1)).insert(question);
         verify(topicRepository, times(1)).findAll();

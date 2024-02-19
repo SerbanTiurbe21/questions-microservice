@@ -8,5 +8,6 @@ import java.io.IOException;
 
 public interface ValidationService {
     byte[] isValidFile(MultipartFile file) throws IOException, ImageTypeException;
+
     void isValidText(String text) throws BlankTextException;
 }

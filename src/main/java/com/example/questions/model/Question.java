@@ -22,6 +22,7 @@ public class Question {
     @DBRef
     private List<Topic> topics;
     private byte[] image;
+
     public Question(String question, String answer, List<Topic> topics, byte[] image) {
         this.question = question;
         this.answer = answer;

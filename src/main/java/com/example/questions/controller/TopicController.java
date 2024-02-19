@@ -12,13 +12,16 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/topics")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class TopicController {
     private final TopicService topicService;
+
     @PostMapping()
     public ResponseEntity<Topic> addTopic(@RequestBody Topic topic) throws Exception {
         Topic createdTopic = topicService.addTopic(topic);
         return new ResponseEntity<>(createdTopic, HttpStatus.CREATED);
     }
+
     @GetMapping()
     public ResponseEntity<List<Topic>> displayTopics() {
         return new ResponseEntity<>(topicService.findAll(), HttpStatus.OK);

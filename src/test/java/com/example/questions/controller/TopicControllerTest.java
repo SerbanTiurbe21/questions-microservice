@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class TopicControllerTest {
@@ -28,6 +29,7 @@ public class TopicControllerTest {
     @AfterEach
     public void tearDown() {
         topic = null;
+        verifyNoMoreInteractions(topicService);
     }
 
     @Test
