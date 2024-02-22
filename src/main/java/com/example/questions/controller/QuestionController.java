@@ -30,8 +30,13 @@ public class QuestionController {
     private final QuestionService service;
 
     @Operation(summary = "Delete a question by id", description = "Return a response data object with status 200 if successful, or 404 if failed")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Question deleted successfully", content = @Content(schema = @Schema(implementation = ResponseData.class))),
+            @ApiResponse(responseCode = "404", description = "Question not found")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseData> deleteQuestion(@PathVariable("id") String id) {
+    public ResponseEntity<ResponseData> deleteQuestion(
+            @Parameter(description = "ID of the question to be deleted", required = true) @PathVariable("id") String id) {
         ResponseData responseData = service.deleteQuestion(id);
         HttpStatus status = Status.SUCCESS.equals(responseData.getStatus()) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         return ResponseEntity.status(status).body(responseData);
@@ -58,7 +63,8 @@ public class QuestionController {
     })
     @Operation(summary = "Get all questions", description = "Return a list of question objects")
     @GetMapping("/{id}")
-    public ResponseEntity<List<Question>> getQuestionsByTopicId(@PathVariable("id") String topicId) throws Exception {
+    public ResponseEntity<List<Question>> getQuestionsByTopicId(
+            @Parameter(description = "ID of the topic to retrieve questions for", required = true) @PathVariable("id") String topicId) throws Exception {
         List<Question> questions = service.getQuestionsByTopicId(topicId);
         return ResponseEntity.ok(questions);
     }
@@ -70,7 +76,7 @@ public class QuestionController {
     })
     @Operation(summary = "Edit a question", description = "Return a question object with status 200 if successful, or 400 if failed")
     @PutMapping("/{id}")
-    public ResponseEntity<Question> editQuestion(@PathVariable("id") String id,
+    public ResponseEntity<Question> editQuestion(@Parameter(description = "ID of the question to be edited", required = true) @PathVariable("id") String id,
                                                  @Parameter(description = "New image file for the question") @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                                                  @Parameter(description = "New text for the question") @RequestParam(value = "question", required = false) String question,
                                                  @Parameter(description = "New answer for the question") @RequestParam(value = "answer", required = false) String answer,
