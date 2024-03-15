@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TopicServiceTest {
+class TopicServiceTest {
     @Mock
     private TopicRepository topicRepository;
     @InjectMocks
@@ -44,7 +44,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void shouldSuccessfullyAddTopic() throws Exception {
+    void shouldSuccessfullyAddTopic() throws Exception {
         Topic savedTopic = new Topic("1", "Java", 0);
 
         when(topicRepository.existsByNameIgnoreCase("Java")).thenReturn(false);
@@ -59,14 +59,14 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void addTopicShouldThrowExceptionForNullTopic() {
+    void addTopicShouldThrowExceptionForNullTopic() {
         assertThrows(InvalidInputException.class, () -> {
             topicService.addTopic(null);
         }, "Please provide a topic");
     }
 
     @Test
-    public void addTopicShouldThrowExceptionForBlankTopicName() {
+    void addTopicShouldThrowExceptionForBlankTopicName() {
         Topic blankNameTopic = new Topic(null, " ", null);
 
         assertThrows(InvalidInputException.class, () -> {
@@ -75,7 +75,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void addTopicShouldThrowExceptionForExistingTopicName() {
+    void addTopicShouldThrowExceptionForExistingTopicName() {
         when(topicRepository.existsByNameIgnoreCase("Java")).thenReturn(true);
 
         assertThrows(InvalidInputException.class, () -> {
@@ -84,7 +84,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void addTopicShouldThrowExceptionForSettingNrOfQuestions() {
+    void addTopicShouldThrowExceptionForSettingNrOfQuestions() {
         Topic topicWithNrOfQuestions = new Topic(null, "Java", 10);
 
         assertThrows(InvalidInputException.class, () -> {
@@ -93,7 +93,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void findAllShouldPopulateNrOfQuestions() throws Exception {
+    void findAllShouldPopulateNrOfQuestions() throws Exception {
         List<Topic> topics = List.of(
                 new Topic("1", "Spring Boot", null),
                 new Topic("2", "Java", null)
@@ -113,7 +113,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void addTopicShouldThrowConnectExceptionOnGenericException() throws Exception {
+    void addTopicShouldThrowConnectExceptionOnGenericException() throws Exception {
         Topic validTopic = new Topic(null, "Java", null);
 
         doThrow(RuntimeException.class).when(topicRepository).insert(validTopic);
@@ -124,7 +124,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void findAll_ShouldThrowRuntimeException_OnException() throws Exception {
+    void findAllShouldThrowRuntimeExceptionOnException() throws Exception {
         List<Topic> topics = List.of(
                 new Topic("1", "Spring Boot", null),
                 new Topic("2", "Java", null)
@@ -137,5 +137,4 @@ public class TopicServiceTest {
             topicService.findAll();
         });
     }
-
 }

@@ -3,7 +3,6 @@ package com.example.questions.controller;
 import com.example.questions.model.Question;
 import com.example.questions.model.ResponseData;
 import com.example.questions.model.Status;
-import com.example.questions.model.Topic;
 import com.example.questions.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -35,25 +34,21 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseData> deleteQuestion(
+    public Mono<ResponseEntity<ResponseData>> deleteQuestion(
             @Parameter(description = "ID of the question to be deleted", required = true) @PathVariable("id") String id) {
         ResponseData responseData = service.deleteQuestion(id);
         HttpStatus status = Status.SUCCESS.equals(responseData.getStatus()) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status).body(responseData);
+        return Mono.just(ResponseEntity.status(status).body(responseData));
     }
 
+    @Operation(summary = "Add a question", description = "Return a question object with status 201 if successful, or 400 if failed")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Question created successfully", content = @Content(schema = @Schema(implementation = Question.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
-    @Operation(summary = "Add a question", description = "Return a question object with status 201 if successful, or 400 if failed")
     @PostMapping()
-    public ResponseEntity<Question> addQuestion(
-            @Parameter(description = "Image file associated with the question") @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            @Parameter(description = "Text of the question", required = true) @RequestParam(value = "question") String question,
-            @Parameter(description = "Answer to the question", required = true) @RequestParam(value = "answer") String answer,
-            @Parameter(description = "List of topics the question is associated with", required = true) @RequestParam(value = "topics") List<Topic> topics) throws Exception {
-        Question createdQuestion = service.createQuestion(imageFile, question, answer, topics);
+    public ResponseEntity<Question> addQuestion(@RequestBody Question question) throws Exception {
+        Question createdQuestion = service.createQuestion(question);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
     }
 
@@ -63,10 +58,10 @@ public class QuestionController {
     })
     @Operation(summary = "Get all questions", description = "Return a list of question objects")
     @GetMapping("/{id}")
-    public ResponseEntity<List<Question>> getQuestionsByTopicId(
+    public Mono<ResponseEntity<List<Question>>> getQuestionsByTopicId(
             @Parameter(description = "ID of the topic to retrieve questions for", required = true) @PathVariable("id") String topicId) throws Exception {
         List<Question> questions = service.getQuestionsByTopicId(topicId);
-        return ResponseEntity.ok(questions);
+        return Mono.just(ResponseEntity.ok(questions));
     }
 
     @ApiResponses({
@@ -76,12 +71,9 @@ public class QuestionController {
     })
     @Operation(summary = "Edit a question", description = "Return a question object with status 200 if successful, or 400 if failed")
     @PutMapping("/{id}")
-    public ResponseEntity<Question> editQuestion(@Parameter(description = "ID of the question to be edited", required = true) @PathVariable("id") String id,
-                                                 @Parameter(description = "New image file for the question") @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                                                 @Parameter(description = "New text for the question") @RequestParam(value = "question", required = false) String question,
-                                                 @Parameter(description = "New answer for the question") @RequestParam(value = "answer", required = false) String answer,
-                                                 @Parameter(description = "New list of topics the question is associated with") @RequestParam(value = "topics", required = false) List<Topic> topics) throws Exception {
-        Question updatedQuestion = service.updateQuestion(id, imageFile, question, answer, topics);
-        return ResponseEntity.ok(updatedQuestion);
+    public Mono<ResponseEntity<Question>> editQuestion(@Parameter(description = "ID of the question to be edited", required = true) @PathVariable("id") String id,
+                                                       @RequestBody Question question) throws Exception {
+        Question updatedQuestion = service.updateQuestion(id, question.getQuestion(), question.getAnswer(), question.getTopics());
+        return Mono.just(ResponseEntity.ok(updatedQuestion));
     }
 }

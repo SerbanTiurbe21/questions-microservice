@@ -16,31 +16,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @DataMongoTest
-public class TopicRepositoryTest {
-
+class TopicRepositoryTest {
     @Autowired
     private TopicRepository topicRepository;
+    private Topic topic1, topic2;
 
     @BeforeEach
     public void setUp() {
-        Topic topic1 = new Topic(null, "Java", null);
-        Topic topic2 = new Topic(null, "Spring", null);
+        topic1 = new Topic(null, "Java", null);
+        topic2 = new Topic(null, "Spring", null);
         topicRepository.saveAll(List.of(topic1, topic2));
     }
 
     @AfterEach
     public void tearDown() {
-        topicRepository.deleteAll();
+        topicRepository.delete(topic1);
+        topicRepository.delete(topic2);
     }
 
     @Test
-    public void whenTopicExists_thenReturnTrue() {
+    void whenTopicExists_thenReturnTrue() {
         boolean exists = topicRepository.existsByNameIgnoreCase("java");
         assertTrue(exists);
     }
 
     @Test
-    public void whenTopicDoesNotExist_thenReturnFalse() {
+    void whenTopicDoesNotExist_thenReturnFalse() {
         boolean exists = topicRepository.existsByNameIgnoreCase("Python");
         assertFalse(exists);
     }

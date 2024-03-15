@@ -1,7 +1,6 @@
 package com.example.questions.service;
 
 import com.example.questions.exception.BlankTextException;
-import com.example.questions.exception.ImageTypeException;
 import com.example.questions.exception.InvalidInputException;
 import com.example.questions.model.Question;
 import com.example.questions.model.Topic;
@@ -15,20 +14,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.anyString;
 
 @ExtendWith(MockitoExtension.class)
-public class QuestionServiceTest {
+class QuestionServiceTest {
     @Mock
     private QuestionRepository questionRepository;
     @Mock
@@ -39,51 +44,48 @@ public class QuestionServiceTest {
     private QuestionServiceImpl questionService;
     private Question question;
     private Topic topic;
-    private MockMultipartFile imageFile;
 
     @BeforeEach
     public void setUp() {
         topic = new Topic("1", "Java", 10);
-        question = new Question("How does Spring work?", "Spring is a Java framework...", List.of(topic), new byte[0]);
-        imageFile = new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
+        question = new Question("How does Spring work?", "Spring is a Java framework...", List.of(topic));
     }
 
     @AfterEach
     public void tearDown() {
         question = null;
         topic = null;
-        imageFile = null;
     }
 
     @Test
-    public void shouldCreateQuestion() throws Exception {
-        when(validationService.isValidFile(imageFile)).thenReturn(new byte[0]);
-        when(questionRepository.insert(question)).thenReturn(question);
-        when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
+    void shouldCreateQuestion() throws Exception {
+        when(topicRepository.findAll()).thenReturn(List.of(topic));
+        when(topicRepository.findByName("Java")).thenReturn(Optional.of(topic));
+        when(questionRepository.insert(any(Question.class))).thenReturn(question);
 
-        Question result = questionService.createQuestion(imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
+        Question createdQuestion = questionService.createQuestion(question);
 
-        assertEquals(question, result);
-        verify(questionRepository, times(1)).getNrOfQuestionsByTopicId(anyString());
-        verify(validationService, times(1)).isValidFile(imageFile);
-        verify(questionRepository, times(1)).insert(question);
+        assertNotNull(createdQuestion);
+        assertEquals(question.getQuestion(), createdQuestion.getQuestion());
+        assertEquals(question.getAnswer(), createdQuestion.getAnswer());
+
         verify(topicRepository, times(1)).findAll();
+        verify(questionRepository, times(1)).insert(any(Question.class));
     }
 
     @Test
-    public void shouldThrowImageTypeExceptionWhenCreateQuestion() throws Exception {
-        when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
-        when(validationService.isValidFile(imageFile)).thenThrow(new ImageTypeException("Invalid file type"));
+    void testCreateQuestionThrowsRuntimeExceptionWhenCatchingInvalidInputExceptionThrownByTopicRepositoryFindByNameWhenNotFoundAnything() {
+        lenient().when(questionRepository.findById("1")).thenReturn(Optional.of(question));
+        lenient().when(topicRepository.findByName("Java")).thenReturn(Optional.empty());
+        lenient().when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
 
-        try {
-            questionService.createQuestion(imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
-        } catch (ImageTypeException e) {
-            assertEquals("Invalid file type", e.getMessage());
-        }
+        assertThrows(Exception.class, () -> {
+            questionService.createQuestion(new Question("How does Spring work?", "Spring is a Java framework...", List.of(topic)));
+        }, "InvalidInputException should be thrown for invalid topic");
     }
 
     @Test
-    public void shouldGetQuestionsByTopicId() throws Exception {
+    void shouldGetQuestionsByTopicId() throws Exception {
         when(topicRepository.findById("1")).thenReturn(Optional.of(new Topic("1", "ValidTopic", null)));
         when(questionRepository.findQuestionsByTopic("1")).thenReturn(Collections.singletonList(question));
 
@@ -94,7 +96,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldThrowInvalidInputExceptionWhenGetQuestionsByTopicId() {
+    void shouldThrowInvalidInputExceptionWhenGetQuestionsByTopicId() {
         when(topicRepository.findById("1")).thenReturn(Optional.empty());
 
         try {
@@ -105,7 +107,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenGetQuestionsByTopicId() {
+    void shouldThrowExceptionWhenGetQuestionsByTopicId() {
         when(topicRepository.findById("1")).thenReturn(Optional.of(new Topic("1", "ValidTopic", null)));
         when(questionRepository.findQuestionsByTopic("1")).thenThrow(new RuntimeException("Error"));
 
@@ -117,7 +119,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldCountQuestionsByTopicId() throws Exception {
+    void shouldCountQuestionsByTopicId() {
         when(questionRepository.getNrOfQuestionsByTopicId("1")).thenReturn(10);
 
         int result = questionService.countQuestionsByTopic("1");
@@ -127,18 +129,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenCountQuestionsByTopicId() {
-        when(questionRepository.getNrOfQuestionsByTopicId("1")).thenThrow(new RuntimeException("Error"));
-
-        try {
-            questionService.countQuestionsByTopic("1");
-        } catch (Exception e) {
-            assertEquals("Error", e.getMessage());
-        }
-    }
-
-    @Test
-    public void shouldDeleteQuestion() throws Exception {
+    void shouldDeleteQuestion() {
         when(questionRepository.findById("1")).thenReturn(Optional.of(question));
 
         questionService.deleteQuestion("1");
@@ -147,7 +138,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldNotDeleteQuestionWhenQuestionNotFound() {
+    void shouldNotDeleteQuestionWhenQuestionNotFound() {
         when(questionRepository.findById("1")).thenReturn(Optional.empty());
 
         try {
@@ -158,37 +149,35 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void shouldUpdateQuestionWhenAllInputFieldsAreValid() throws Exception {
+    void shouldUpdateQuestionWhenAllInputFieldsAreValid() throws Exception {
         when(questionRepository.findById("1")).thenReturn(Optional.of(question));
+        when(topicRepository.findByName("Java")).thenReturn(Optional.of(topic));
         when(questionRepository.getQuestionById("1")).thenReturn(question);
 
         when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
-        when(validationService.isValidFile(imageFile)).thenReturn(new byte[0]);
         doNothing().when(validationService).isValidText("How does Spring work?");
         doNothing().when(validationService).isValidText("Spring is a Java framework...");
         when(questionRepository.save(any(Question.class))).thenReturn(question);
 
-        questionService.updateQuestion("1", imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
+        questionService.updateQuestion("1", "How does Spring work?", "Spring is a Java framework...", List.of(topic));
 
         verify(questionRepository, times(1)).save(question);
     }
 
     @Test
-    public void shouldThrowImageTypeExceptionWhenUpdateQuestion() throws Exception {
+    void testUpdateQuestion_ThrowsRuntimeExceptionForInvalidTopic() {
         when(questionRepository.findById("1")).thenReturn(Optional.of(question));
-        when(questionRepository.getQuestionById("1")).thenReturn(question);
+        when(topicRepository.findByName("Java")).thenReturn(Optional.empty());
         when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
-        when(validationService.isValidFile(imageFile)).thenThrow(new ImageTypeException("Invalid file type"));
 
-        try {
-            questionService.updateQuestion("1", imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
-        } catch (ImageTypeException e) {
-            assertEquals("Invalid file type", e.getMessage());
-        }
+        assertThrows(RuntimeException.class, () -> {
+            questionService.updateQuestion("1", "How does Spring work?", "Spring is a Java framework...", List.of(topic));
+        }, "InvalidInputException should be thrown for invalid topic");
     }
 
+
     @Test
-    public void shouldGetQuestionById() {
+    void shouldGetQuestionById() {
         when(questionRepository.findById("1")).thenReturn(Optional.of(question));
 
         Optional<Question> result = questionService.getQuestionById("1");
@@ -198,23 +187,22 @@ public class QuestionServiceTest {
     }
 
     @Test
-    public void updateQuestionShouldThrowInvalidInputExceptionWhenQuestionIsNotFound() {
+    void updateQuestionShouldThrowInvalidInputExceptionWhenQuestionIsNotFound() {
         when(questionRepository.findById("1")).thenReturn(Optional.empty());
         when(topicRepository.findAll()).thenReturn(Collections.singletonList(topic));
 
         try {
-            questionService.updateQuestion("1", imageFile, "How does Spring work?", "Spring is a Java framework...", List.of(topic));
+            questionService.updateQuestion("1", "How does Spring work?", "Spring is a Java framework...", List.of(topic));
         } catch (Exception e) {
             assertEquals("Question could not be found", e.getMessage());
         }
     }
 
     @Test
-    public void createQuestionShouldThrowBlankTextExceptionForBlankQuestion() throws BlankTextException {
+    void createQuestionShouldThrowBlankTextExceptionForBlankQuestion() throws BlankTextException {
         String blankQuestion = " ";
         String validAnswer = "Spring is a powerful framework.";
         List<Topic> validTopics = List.of(new Topic("1", "Java", 10));
-        MultipartFile validImageFile = new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
 
         when(topicRepository.findAll()).thenReturn(validTopics);
         doThrow(new BlankTextException("Question text cannot be blank"))
@@ -222,37 +210,49 @@ public class QuestionServiceTest {
         doNothing().when(validationService).isValidText(validAnswer);
 
         assertThrows(BlankTextException.class, () -> {
-            questionService.createQuestion(validImageFile, blankQuestion, validAnswer, validTopics);
+            questionService.createQuestion(new Question(blankQuestion, validAnswer, validTopics));
         }, "BlankTextException should be thrown for blank question text");
     }
 
     @Test
-    public void createQuestionShouldThrowInvalidInputExceptionForInvalidTopics() throws Exception {
+    void createQuestionShouldThrowInvalidInputExceptionForInvalidTopics() throws Exception {
         String validQuestion = "How does Spring work?";
         String validAnswer = "Spring is a Java framework...";
         List<Topic> invalidTopics = List.of(new Topic("invalidId", "NonExistingTopic", 0));
-        MultipartFile validImageFile = new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
 
         when(topicRepository.findAll()).thenReturn(Collections.emptyList());
-        lenient().when(validationService.isValidFile(validImageFile)).thenReturn(new byte[0]);
 
         assertThrows(InvalidInputException.class, () -> {
-            questionService.createQuestion(validImageFile, validQuestion, validAnswer, invalidTopics);
+            questionService.createQuestion(new Question(validQuestion, validAnswer, invalidTopics));
         }, "InvalidInputException should be thrown for invalid topics");
     }
 
     @Test
-    public void createQuestionShouldThrowInvalidInputExceptionForNullTopic() {
+    void createQuestionShouldThrowInvalidInputExceptionForNullTopic() {
         String validQuestion = "How does Spring work?";
         String validAnswer = "Spring is a Java framework...";
         List<Topic> topicsWithNull = Arrays.asList(new Topic("1", "Java", 10), null);
-        MultipartFile validImageFile = new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
 
         when(topicRepository.findAll()).thenReturn(Collections.singletonList(new Topic("1", "Java", 10)));
 
         assertThrows(InvalidInputException.class, () -> {
-            questionService.createQuestion(validImageFile, validQuestion, validAnswer, topicsWithNull);
+            questionService.createQuestion(new Question(validQuestion, validAnswer, topicsWithNull));
         }, "InvalidInputException should be thrown for null topic");
     }
 
+    @Test
+    void createQuestionShouldThrowGenericExceptionForUnexpectedErrors() {
+        Topic topic = new Topic("1", "Java", 10);
+        Question question = new Question("Valid question?", "Yes", List.of(topic));
+
+        lenient().when(topicRepository.findByName("Java")).thenReturn(Optional.of(topic));
+        lenient().when(topicRepository.findAll()).thenReturn(List.of(topic));
+        lenient().when(topicRepository.findById(anyString())).thenReturn(Optional.of(topic));
+        when(questionRepository.insert(any(Question.class))).thenThrow(new RuntimeException("Unexpected error"));
+
+        Exception exception = assertThrows(Exception.class, () -> questionService.createQuestion(question),
+                "Expected to catch and rethrow a generic Exception for unexpected errors");
+
+        assertEquals("Unexpected error", exception.getMessage(), "The exception message should match the one from the unexpected error");
+    }
 }

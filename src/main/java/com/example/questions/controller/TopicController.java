@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -30,9 +31,9 @@ public class TopicController {
     })
     @Operation(summary = "Add a topic", description = "Return a topic object with status 201 if successful, or 400 if failed")
     @PostMapping()
-    public ResponseEntity<Topic> addTopic(@Parameter(description = "Topic object to be added to the database") @RequestBody Topic topic) throws Exception {
+    public Mono<ResponseEntity<Topic>> addTopic(@Parameter(description = "Topic object to be added to the database") @RequestBody Topic topic) throws Exception {
         Topic createdTopic = topicService.addTopic(topic);
-        return new ResponseEntity<>(createdTopic, HttpStatus.CREATED);
+        return Mono.just(new ResponseEntity<>(createdTopic, HttpStatus.CREATED));
     }
 
     @ApiResponses(value = {
@@ -41,8 +42,8 @@ public class TopicController {
     })
     @Operation(summary = "Get all topics", description = "Return a list of topic objects")
     @GetMapping()
-    public ResponseEntity<List<Topic>> displayTopics() {
+    public Mono<ResponseEntity<List<Topic>>> displayTopics() {
         List<Topic> topics = topicService.findAll();
-        return new ResponseEntity<>(topics, HttpStatus.OK);
+        return Mono.just(new ResponseEntity<>(topics, HttpStatus.OK));
     }
 }

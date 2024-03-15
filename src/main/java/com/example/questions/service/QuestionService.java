@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QuestionService {
-    Question createQuestion(MultipartFile imageFile, String question, String answer, List<Topic> topics) throws Exception;
+    Question createQuestion(Question question) throws Exception;
 
     List<Question> getQuestionsByTopicId(String topicId) throws Exception;
 
@@ -19,5 +19,5 @@ public interface QuestionService {
 
     Optional<Question> getQuestionById(String id);
 
-    Question updateQuestion(String id, MultipartFile imageFile, String question, String answer, List<Topic> topics) throws Exception;
+    Question updateQuestion(String id, String question, String answer, List<Topic> topics) throws Exception;
 }

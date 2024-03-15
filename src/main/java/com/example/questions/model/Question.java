@@ -21,12 +21,10 @@ public class Question {
     private String answer;
     @DBRef
     private List<Topic> topics;
-    private byte[] image;
 
-    public Question(String question, String answer, List<Topic> topics, byte[] image) {
+    public Question(String question, String answer, List<Topic> topics) {
         this.question = question;
         this.answer = answer;
         this.topics = topics;
-        this.image = image;
     }
 }

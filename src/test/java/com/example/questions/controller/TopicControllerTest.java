@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class TopicControllerTest {
+class TopicControllerTest {
     @Mock
     private TopicService topicService;
     @InjectMocks
@@ -33,13 +33,13 @@ public class TopicControllerTest {
     }
 
     @Test
-    public void addTopicShouldCallService() throws Exception {
+    void addTopicShouldCallService() throws Exception {
         topicController.addTopic(topic);
         verify(topicService).addTopic(topic);
     }
 
     @Test
-    public void displayTopicsShouldCallService() {
+    void displayTopicsShouldCallService() {
         topicController.displayTopics();
         verify(topicService).findAll();
     }

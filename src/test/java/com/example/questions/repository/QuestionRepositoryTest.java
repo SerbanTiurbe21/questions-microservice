@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @DataMongoTest
-public class QuestionRepositoryTest {
+class QuestionRepositoryTest {
     @Autowired
     private QuestionRepository questionRepository;
     private Question question1;
@@ -25,18 +25,19 @@ public class QuestionRepositoryTest {
     @BeforeEach
     public void setUp() {
         Topic topic = new Topic("1", "Java", null);
-        question1 = new Question("How does Java work?", "Answer 1", List.of(topic), new byte[0]);
-        question2 = new Question("What is Spring?", "Answer 2", List.of(topic), new byte[0]);
+        question1 = new Question("How does Java work?", "Answer 1", List.of(topic));
+        question2 = new Question("What is Spring?", "Answer 2", List.of(topic));
         questionRepository.saveAll(List.of(question1, question2));
     }
 
     @AfterEach
     public void tearDown() {
-        questionRepository.deleteAll();
+        questionRepository.delete(question1);
+        questionRepository.delete(question2);
     }
 
     @Test
-    public void shouldFindQuestionsByTopic() {
+    void shouldFindQuestionsByTopic() {
         final String topicId = "1";
         List<Question> questions = questionRepository.findQuestionsByTopic(topicId);
 
@@ -46,7 +47,7 @@ public class QuestionRepositoryTest {
     }
 
     @Test
-    public void shouldGetNrOfQuestionsByTopicId() {
+    void shouldGetNrOfQuestionsByTopicId() {
         final String topicId = "1";
         int nrOfQuestions = questionRepository.getNrOfQuestionsByTopicId(topicId);
 
@@ -54,11 +55,10 @@ public class QuestionRepositoryTest {
     }
 
     @Test
-    public void shouldGetQuestionById() {
+    void shouldGetQuestionById() {
         Question question = questionRepository.getQuestionById(question1.getId());
 
         assertNotNull(question);
         assertEquals(question1.getQuestion(), question.getQuestion());
     }
-
 }
