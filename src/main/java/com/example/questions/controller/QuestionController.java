@@ -34,7 +34,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "200", description = "Question deleted successfully", content = @Content(schema = @Schema(implementation = ResponseData.class))),
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<ResponseData>> deleteQuestion(
             @Parameter(description = "ID of the question to be deleted", required = true) @PathVariable("id") String id) {
@@ -48,7 +48,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "201", description = "Question created successfully", content = @Content(schema = @Schema(implementation = Question.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @PostMapping()
     public ResponseEntity<Question> addQuestion(@RequestBody Question question) throws Exception {
         Question createdQuestion = service.createQuestion(question);
@@ -60,7 +60,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Topic not found")
     })
     @Operation(summary = "Get all questions", description = "Return a list of question objects")
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @GetMapping("/{id}")
     public Mono<ResponseEntity<List<Question>>> getQuestionsByTopicId(
             @Parameter(description = "ID of the topic to retrieve questions for", required = true) @PathVariable("id") String topicId) throws Exception {
@@ -74,7 +74,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @Operation(summary = "Edit a question", description = "Return a question object with status 200 if successful, or 400 if failed")
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @PutMapping("/{id}")
     public Mono<ResponseEntity<Question>> editQuestion(@Parameter(description = "ID of the question to be edited", required = true) @PathVariable("id") String id,
                                                        @RequestBody Question question) throws Exception {

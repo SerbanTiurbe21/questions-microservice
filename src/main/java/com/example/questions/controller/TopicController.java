@@ -31,7 +31,7 @@ public class TopicController {
             @ApiResponse(responseCode = "400", description = "Failed to add topic")
     })
     @Operation(summary = "Add a topic", description = "Return a topic object with status 201 if successful, or 400 if failed")
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @PostMapping()
     public Mono<ResponseEntity<Topic>> addTopic(@Parameter(description = "Topic object to be added to the database") @RequestBody Topic topic) throws Exception {
         Topic createdTopic = topicService.addTopic(topic);
@@ -43,7 +43,7 @@ public class TopicController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @Operation(summary = "Get all topics", description = "Return a list of topic objects")
-    @PreAuthorize("hasRole('ROLE_client-HR') or hasRole('ROLE_client-developer')")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @GetMapping()
     public Mono<ResponseEntity<List<Topic>>> displayTopics() {
         List<Topic> topics = topicService.findAll();
