@@ -49,9 +49,9 @@ public class QuestionController {
     })
     @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
     @PostMapping()
-    public ResponseEntity<Question> addQuestion(@RequestBody Question question) throws Exception {
+    public Mono<ResponseEntity<Question>> addQuestion(@RequestBody Question question) throws Exception {
         Question createdQuestion = service.createQuestion(question);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
+        return Mono.just(ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion));
     }
 
     @ApiResponses({

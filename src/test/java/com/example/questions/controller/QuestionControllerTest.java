@@ -59,7 +59,7 @@ class QuestionControllerTest {
     @Test
     void addQuestionShouldCallService() throws Exception {
         when(questionService.createQuestion(question)).thenReturn(question);
-        Question result = questionController.addQuestion(question).getBody();
+        Question result = questionController.addQuestion(question).block().getBody();
         assertEquals(question, result);
         verify(questionService).createQuestion(question);
     }
