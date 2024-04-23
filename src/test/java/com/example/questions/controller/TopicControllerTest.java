@@ -34,13 +34,19 @@ class TopicControllerTest {
 
     @Test
     void addTopicShouldCallService() throws Exception {
-        topicController.addTopic(topic);
+        topicController.addTopic(topic).block();
         verify(topicService).addTopic(topic);
     }
 
     @Test
     void displayTopicsShouldCallService() {
-        topicController.displayTopics();
+        topicController.displayTopics().block();
         verify(topicService).findAll();
+    }
+
+    @Test
+    void getTopicByIdShouldCallService() {
+        topicController.getTopicById("1").block();
+        verify(topicService).findById("1");
     }
 }

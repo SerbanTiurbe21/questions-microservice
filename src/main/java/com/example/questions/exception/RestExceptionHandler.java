@@ -24,4 +24,13 @@ public class RestExceptionHandler {
         );
         return new ResponseEntity<>(questionsException, questionsException.getHttpStatus());
     }
+
+    @ExceptionHandler(value = {TopicNotFoundException.class})
+    public ResponseEntity<Object> handleTopicNotFoundException(TopicNotFoundException exception) {
+        QuestionsException questionsException = new QuestionsException(
+                exception.getMessage(),
+                HttpStatus.NOT_FOUND
+        );
+        return new ResponseEntity<>(questionsException, questionsException.getHttpStatus());
+    }
 }

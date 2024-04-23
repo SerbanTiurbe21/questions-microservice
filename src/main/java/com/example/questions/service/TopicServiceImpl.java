@@ -1,6 +1,7 @@
 package com.example.questions.service;
 
 import com.example.questions.exception.InvalidInputException;
+import com.example.questions.exception.TopicNotFoundException;
 import com.example.questions.model.Topic;
 import com.example.questions.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,11 @@ public class TopicServiceImpl implements TopicService {
         });
 
         return topics;
+    }
+
+    @Override
+    public Topic findById(String id) {
+        return topicRepository.findById(id).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
     }
 
     private void verifyTopic(Topic topic) throws InvalidInputException {

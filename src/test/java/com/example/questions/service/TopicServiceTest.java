@@ -1,6 +1,7 @@
 package com.example.questions.service;
 
 import com.example.questions.exception.InvalidInputException;
+import com.example.questions.exception.TopicNotFoundException;
 import com.example.questions.model.Topic;
 import com.example.questions.repository.TopicRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -136,5 +137,27 @@ class TopicServiceTest {
         assertThrows(RuntimeException.class, () -> {
             topicService.findAll();
         });
+    }
+
+    @Test
+    void findByIdShouldReturnTopic() {
+        Topic topic = new Topic("1", "Java", null);
+
+        when(topicRepository.findById("1")).thenReturn(java.util.Optional.of(topic));
+
+        Topic result = topicService.findById("1");
+
+        assertEquals("1", result.getId());
+        assertEquals("Java", result.getName());
+        assertEquals(null, result.getNrOfQuestions());
+    }
+
+    @Test
+    void findByIdShouldThrowExceptionForNonExistingTopic() {
+        when(topicRepository.findById("1")).thenThrow(TopicNotFoundException.class);
+
+        assertThrows(TopicNotFoundException.class, () -> {
+            topicService.findById("1");
+        }, "Topic not found");
     }
 }

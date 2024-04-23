@@ -8,4 +8,5 @@ public interface TopicService {
     Topic addTopic(Topic topic) throws Exception;
 
     List<Topic> findAll();
+    Topic findById(String id);
 }

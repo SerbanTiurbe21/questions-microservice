@@ -48,4 +48,16 @@ public class TopicController {
         List<Topic> topics = topicService.findAll();
         return Mono.just(new ResponseEntity<>(topics, HttpStatus.OK));
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Topic retrieved successfully", content = @Content(schema = @Schema(implementation = Topic.class))),
+            @ApiResponse(responseCode = "404", description = "Topic not found")
+    })
+    @Operation(summary = "Get a topic by id", description = "Return a topic object")
+    @PreAuthorize("hasRole('ROLE_client-hr') or hasRole('ROLE_client-developer')")
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<Topic>> getTopicById(@Parameter(description = "ID of the topic to be retrieved", required = true) @PathVariable("id") String id) {
+        Topic topic = topicService.findById(id);
+        return Mono.just(new ResponseEntity<>(topic, HttpStatus.OK));
+    }
 }
