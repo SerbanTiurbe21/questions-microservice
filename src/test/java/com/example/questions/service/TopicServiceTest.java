@@ -149,7 +149,7 @@ class TopicServiceTest {
 
         assertEquals("1", result.getId());
         assertEquals("Java", result.getName());
-        assertEquals(null, result.getNrOfQuestions());
+        assertEquals(0, result.getNrOfQuestions());
     }
 
     @Test
@@ -159,5 +159,31 @@ class TopicServiceTest {
         assertThrows(TopicNotFoundException.class, () -> {
             topicService.findById("1");
         }, "Topic not found");
+    }
+
+    @Test
+    void findByIdShouldPopulateNrOfQuestions() throws Exception {
+        Topic topic = new Topic("1", "Java", null);
+
+        when(topicRepository.findById("1")).thenReturn(java.util.Optional.of(topic));
+        when(questionService.countQuestionsByTopic("1")).thenReturn(10);
+
+        Topic result = topicService.findById("1");
+
+        assertEquals("1", result.getId());
+        assertEquals("Java", result.getName());
+        assertEquals(10, result.getNrOfQuestions());
+    }
+
+    @Test
+    void findByIdShouldThrowRuntimeExceptionOnException() throws Exception {
+        Topic topic = new Topic("1", "Java", null);
+
+        when(topicRepository.findById("1")).thenReturn(java.util.Optional.of(topic));
+        when(questionService.countQuestionsByTopic("1")).thenThrow(RuntimeException.class);
+
+        assertThrows(RuntimeException.class, () -> {
+            topicService.findById("1");
+        });
     }
 }

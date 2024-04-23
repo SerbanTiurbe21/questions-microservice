@@ -46,7 +46,13 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public Topic findById(String id) {
-        return topicRepository.findById(id).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
+        Topic topic = topicRepository.findById(id).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
+        try {
+            topic.setNrOfQuestions(questionService.countQuestionsByTopic(topic.getId()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return topic;
     }
 
     private void verifyTopic(Topic topic) throws InvalidInputException {
